@@ -1,81 +1,116 @@
-# Implementing Well-Architected Best Practices for Amazon SQS with CDK
+# Event-driven architecture with SQS, Lambda, and DynamoDB
 
-Amazon Simple Queue Service (Amazon SQS) is a fully managed message queuing service that enables customers to decouple and scale microservices, distributed systems, and serverless applications. Customers use SQS in a variety of use-cases requiring loose coupling and high performance at any level of throughput, while reducing cost by only paying for value and remaining confident that no message will be lost. Customers building these applications are looking to build and operate their applications following best practices. 
+| Key          | Value                                                                               |
+| ------------ | ----------------------------------------------------------------------------------- |
+| Environment  | LocalStack, AWS                                                                     |
+| Services     | SQS, DynamoDB, Lambda, S3                                                           |
+| Integrations | CDK                                                                                 |
+| Categories   | Serverless; Event-driven architecture                                               |
+| Level        | Intermediate                                                                        |
+| GitHub       | [Repository link](https://github.com/localstack-samples/sample-sqs-lambda-dynamodb) |
 
-Built around six pillars — operational excellence, security, reliability, performance efficiency, cost optimization, and sustainability — AWS Well-Architected provides a consistent approach for customers and partners to evaluate architectures and implement scalable designs. In this project, we provide CDK artifacts  written in Python to deploy an event-driven architecture taking in to consideration the SQS best practices.
+## Introduction
 
-## Solution Architecture
+The Event-driven architecture with SQS, DynamoDB, Lambda, and S3 demonstrates an inventory management system that streamlines inventory operations and ensure accurate inventory levels. The sample application implements the following:
 
-![Architecture diagram](static/architecture.png)
+- CSV files are uploaded to an S3 bucket, thus consolidating and securing the inventory data for the inventory management system's access.
+- A Lambda function is utilized to read and parse the CSV file, extracting individual inventory update records.
+- Each record is transformed into a message and sent to an SQS queue. Another Lambda function continually polls the SQS queue for new messages.
+- Upon receiving a message, it retrieves the inventory update details and updates the inventory levels in DynamoDB accordingly.
 
-This solution architecture shows an example of an inventory management system. The system leverages Amazon S3, AWS Lambda, Amazon SQS, and Amazon DynamoDB to streamline inventory operations and ensure accurate inventory levels. The system handles frequent updates from multiple sources, such as suppliers, warehouses, and retail stores, which are received as CSV files. 
+Users can deploy this application on LocalStack and AWS with no changes using Cloud Development Kit (CDK). To test this application sample, we will demonstrate how you use LocalStack to deploy the infrastructure on your developer machine and your CI environment. Furthermore, we will showcase how you can check out the event-driven architecture using LocalStack Web Application.
 
-These CSV files are then uploaded to an S3 bucket, consolidating and securing the inventory data for the inventory management system's access. The system employs a Lambda function to read and parse the CSV file, extracting individual inventory update records. Each record is transformed into a message and sent to an SQS queue. Another Lambda function continually polls the SQS queue for new messages. Upon receiving a message, it retrieves the inventory update details and updates the inventory levels in DynamoDB accordingly.  
+## Architecture diagram
 
-This ensures that the inventory quantities for each product are accurate and reflect the latest changes. This way, the inventory management system provides real-time visibility into inventory levels across different locations, suppliers enabling the company to monitor product availability with precision.  Find the example code for this solution in the GitHub repository.
+The following diagram shows the architecture that this sample application builds and deploys:
 
-## Deploy the architecture
+![]()
 
-Creating a python virtual environment
+We are using the following AWS services and their features to build our infrastructure:
 
-```
-$ python3 -m venv .venv
-```
+- [SQS](https://docs.localstack.cloud/user-guide/aws/sqs/) as a distributed message queuing service to decouple the inventory update records from the inventory management system.
+- [DynamoDB](https://docs.localstack.cloud/user-guide/aws/dynamodb/) as a key-value and document database to update the inventory levels for each product.
+- [Lambda](https://docs.localstack.cloud/user-guide/aws/lambda/) as a serverless compute service to process the inventory update records and update the inventory levels in DynamoDB.
+- [S3](https://docs.localstack.cloud/user-guide/aws/s3/) as an object storage service to store the inventory update records.
 
-After the init process completes and the virtualenv is created. Activate your virtualenv
+## Prerequisites
 
-```
-$ source .venv/bin/activate
-```
+- LocalStack Pro with the [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
+- [Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed with the [`cdklocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cdk/).
+- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
+- [Node.js](https://nodejs.org/en/) with the `npm` package manager.
+- [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
 
-If you are a Windows platform, you would activate the virtualenv like this:
+Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
 
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-Deploy this stack to your default AWS account/region
-
-```
-$ cdk deploy
-```
-## Test the solution
-
-Once the CloudFormation stack deploys, the terminal will output the S3 bucket name. Use the below AWS CLI command to copy the file to the S3 bucket
-
-```
-$ aws s3 cp sqs_blog/sample_file.csv s3://<bucket_name>
+```shell
+export LOCALSTACK_API_KEY=<your-api-key>
+DEBUG=1 localstack start
 ```
 
-Go to [DynamoDB console](https://console.aws.amazon.com/dynamodbv2/home) and check the records in the table.
+We specified DEBUG=1 to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
 
-## Clean up
+## Instructions
 
-To delete the CloudFormation stack and remove associated resouces, use the below CDK command
+### Installing the dependencies
 
+You can create a Python virtual environment using `virtualenv` with the following command:
+
+```shell
+python3 -m venv .venv
 ```
-$ cdk destroy
+
+After initializing the virtual environment, activate it using the following command:
+
+```shell
+source .venv/bin/activate # Linux/macOS
+.venv\Scripts\activate.bat # Windows
 ```
 
-## Security
+You can now install the required dependencies using the following command:
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+```shell
+pip install -r requirements.txt
+```
 
-## License
+### Deploying the application
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
+To create the AWS infrastructure locally, you can use CDK and our `cdklocal` wrapper.
 
-## DISCLAIMER
+```shell
+cdklocal bootstrap
+cdklocal deploy
+```
+This will deploy the `SqsBlogStack` stack. You will see the following output:
 
-The solution architecture sample code is provided without any guarantees, and you're not recommended to use it for production-grade workloads. The intention is to provide content to build and learn. Be sure of reading the licensing terms.
+```bash
+Outputs:
+SqsBlogStack.S3BucketName = sqsblogstack-inventoryupdatesbucketfe-54927c8a
+Stack ARN:
+arn:aws:cloudformation:us-east-1:000000000000:stack/SqsBlogStack/8de4814d
+
+✨  Total time: 35.17s
+```
+
+The `SqsBlogStack.S3BucketName` output is the name of the S3 bucket that we will use to upload the CSV file. This would be different for you.
+
+### Testing the application
+
+You can copy the `sqs_blog/sample_file.csv` file to the S3 bucket to trigger the event-driven architecture. You can use the following AWS CLI command to copy the file to the S3 bucket:
+
+```shell
+BUCKET_NAME=$(awslocal s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
+awslocal s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
+```
+
+You can now navigate to the [LocalStack Web Application(https://app.localstack.cloud) and the [DynamoDB Resource Browser](https://app.localstack.cloud/inst/default/resources/dynamodb). 
+
+Click on the **SqsBlogStack-InventoryUpdates-*** table to view the inventory updates. You can view the items by switching to scan, selecting the index, and clicking **Submit**. You will see the following:
+
+![DynamoDB Resource Browser](./images/sqs-blog-stack-inventory-dynamodb-resource-browser.png)
+
+### GitHub Action
+
+This application sample hosts an example GitHub Action workflow that starts up LocalStack, builds the Lambda functions, and deploys the infrastructure on the runner. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the  `main` branch.
+
+Users can adapt this example workflow to run in their own CI environment. LocalStack supports various CI environments, including GitHub Actions, CircleCI, Jenkins, Travis CI, and more. You can find more information about the CI integration in the [LocalStack documentation](https://docs.localstack.cloud/user-guide/ci/).
