@@ -48,7 +48,7 @@ export LOCALSTACK_API_KEY=<your-api-key>
 DEBUG=1 localstack start
 ```
 
-We specified DEBUG=1 to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
+We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
 
 ## Instructions
 
@@ -103,7 +103,7 @@ BUCKET_NAME=$(awslocal s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk 
 awslocal s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
 ```
 
-You can now navigate to the [LocalStack Web Application(https://app.localstack.cloud) and the [DynamoDB Resource Browser](https://app.localstack.cloud/inst/default/resources/dynamodb). 
+You can now navigate to the [LocalStack Web Application](https://app.localstack.cloud) and the [DynamoDB Resource Browser](https://app.localstack.cloud/inst/default/resources/dynamodb).
 
 Click on the **SqsBlogStack-InventoryUpdates-*** table to view the inventory updates. You can view the items by switching to scan, selecting the index, and clicking **Submit**. You will see the following:
 
@@ -114,3 +114,7 @@ Click on the **SqsBlogStack-InventoryUpdates-*** table to view the inventory upd
 This application sample hosts an example GitHub Action workflow that starts up LocalStack, builds the Lambda functions, and deploys the infrastructure on the runner. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the  `main` branch.
 
 Users can adapt this example workflow to run in their own CI environment. LocalStack supports various CI environments, including GitHub Actions, CircleCI, Jenkins, Travis CI, and more. You can find more information about the CI integration in the [LocalStack documentation](https://docs.localstack.cloud/user-guide/ci/).
+
+## Contributing
+
+We appreciate your interest in contributing to our project and are always looking for new ways to improve the developer experience. We welcome feedback, bug reports, and even feature ideas from the community. Refer to the [contributing guide](CONTRIBUTING.md) for more details on how to get started.
