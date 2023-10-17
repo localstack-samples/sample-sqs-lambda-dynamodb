@@ -24,7 +24,7 @@ Users can deploy this application on LocalStack and AWS with no changes using Cl
 
 The following diagram shows the architecture that this sample application builds and deploys:
 
-![]()
+![Architecture Diagram for Event-driven architecture with SQS, Lambda, and DynamoDB](images/architecture-diagram.png)
 
 We are using the following AWS services and their features to build our infrastructure:
 
