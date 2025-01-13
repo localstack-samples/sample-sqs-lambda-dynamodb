@@ -32,7 +32,7 @@ jobs:
 
       - name: Install CDK
         run: |
-          npm install -g aws-cdk-local>=2.19.0 aws-cdk
+          npm install -g aws-cdk-local@2.19.1 aws-cdk
           cdklocal --version
 
       - name: Install Python
