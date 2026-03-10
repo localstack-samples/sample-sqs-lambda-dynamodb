@@ -35,17 +35,21 @@ We are using the following AWS services and their features to build our infrastr
 
 ## Prerequisites
 
-- LocalStack Pro with the [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
+- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/getting-started/auth-token/) to activate LocalStack.
+- [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
 - [Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed with the [`cdklocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cdk/).
 - [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
 - [Node.js](https://nodejs.org/en/) with the `npm` package manager.
 - [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
 
-Start LocalStack Pro with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
+## Start LocalStack
+
+Start LocalStack with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
 
 ```shell
 export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
-DEBUG=1 localstack start
+make start
+make ready
 ```
 
 We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
