@@ -31,7 +31,7 @@ jobs:
       - name: Install CDK
         run: |
           npm install -g @localstack/lstk aws-cdk
-          lstk cdk --version
+          cdk --version
 
       - name: Install Python
         uses: actions/setup-python@v4
