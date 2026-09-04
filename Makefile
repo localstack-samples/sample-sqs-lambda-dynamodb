@@ -7,27 +7,21 @@ usage:		## Show this help
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$//' | sed -e 's/##//'
 
 install:	## Install dependencies
-	@which localstack || pip install localstack
-	@which awslocal || pip install awscli-local
-	@which cdklocal || npm install -g aws-cdk-local aws-cdk
+	@which lstk || npm install -g @localstack/lstk aws-cdk
 
 start:		## Start LocalStack
 	@test -n "${LOCALSTACK_AUTH_TOKEN}" || (echo "LOCALSTACK_AUTH_TOKEN is not set. Find your token at https://app.localstack.cloud/workspace/auth-token"; exit 1)
-	@LOCALSTACK_AUTH_TOKEN=$(LOCALSTACK_AUTH_TOKEN) localstack start -d
+	@LOCALSTACK_AUTH_TOKEN=$(LOCALSTACK_AUTH_TOKEN) lstk start
 
 stop:		## Stop LocalStack
-	@localstack stop
-
-ready:		## Wait until LocalStack is ready
-	@echo Waiting on the LocalStack container...
-	@localstack wait -t 30 && echo LocalStack is ready to use! || (echo Gave up waiting on LocalStack, exiting. && exit 1)
+	@lstk stop
 
 logs:		## Save the logs in a separate file
-	@localstack logs > logs.txt
+	@lstk logs > logs.txt
 
 deploy:		## Deploy infrastructure using CDK
 	pip install -r requirements.txt
-	cdklocal bootstrap
-	cdklocal deploy --require-approval never
+	lstk cdk bootstrap
+	lstk cdk deploy --require-approval never
 
-.PHONY: usage install start stop ready logs deploy
+.PHONY: usage install start stop logs deploy

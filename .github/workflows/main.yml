@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   cdk:
@@ -23,8 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: gautamkrishnar/keepalive-workflow@v1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,8 +31,8 @@ jobs:
 
       - name: Install CDK
         run: |
-          npm install -g aws-cdk-local aws-cdk
-          cdklocal --version
+          npm install -g @localstack/lstk aws-cdk
+          cdk --version
 
       - name: Install Python
         uses: actions/setup-python@v4
@@ -48,27 +47,21 @@ jobs:
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: |
-          pip install localstack awscli-local[ver1]
           docker pull localstack/localstack-pro:latest
-          # Start LocalStack in the background
-          DEBUG=1 localstack start -d
-          # Wait 30 seconds for the LocalStack container to become ready before timing out
-          echo "Waiting for LocalStack startup..."
-          localstack wait -t 15
-          echo "Startup complete"
+          LOCALSTACK_DEBUG=1 lstk start
 
       - name: Deploy using CDK
         run: |
           export AWS_ACCESS_KEY_ID="test"
           export AWS_SECRET_ACCESS_KEY="test"
           export AWS_DEFAULT_REGION="us-east-1"
-          cdklocal bootstrap aws://000000000000/us-east-1
-          cdklocal deploy --require-approval never
+          lstk cdk bootstrap aws://000000000000/us-east-1
+          lstk cdk deploy --require-approval never
 
       - name: Run tests
         run: |
-          export BUCKET_NAME=$(awslocal s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
-          awslocal s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
+          export BUCKET_NAME=$(lstk aws s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
+          lstk aws s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
 
       - name: Send a Slack notification
         if: failure() || github.event_name != 'pull_request'
@@ -94,3 +87,10 @@ jobs:
         with:
           name: diagnose.json.gz
           path: ./diagnose.json.gz
+
+      # Re-enabling the workflow resets GitHub's 60-day scheduled-workflow inactivity timer
+      - name: Keep the scheduled workflow enabled
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT repos/${{ github.repository }}/actions/workflows/main.yml/enable

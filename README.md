@@ -35,10 +35,10 @@ We are using the following AWS services and their features to build our infrastr
 
 ## Prerequisites
 
-- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/getting-started/auth-token/) to activate LocalStack.
-- [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
-- [Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed with the [`cdklocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cdk/).
-- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
+- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/aws/getting-started/auth-token/) to activate LocalStack.
+- [`lstk` CLI](https://docs.localstack.cloud/aws/developer-tools/running-localstack/lstk/).
+- [Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed, deployed via the `lstk cdk` proxy.
+- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/), required by `lstk aws`.
 - [Node.js](https://nodejs.org/en/) with the `npm` package manager.
 - [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
 
@@ -49,10 +49,9 @@ Start LocalStack with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
 ```shell
 export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
 make start
-make ready
 ```
 
-We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
+We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal to help us see the event-driven architecture in action. You can also view the logs with `lstk logs` or Docker Desktop.
 
 ## Instructions
 
@@ -79,11 +78,11 @@ pip install -r requirements.txt
 
 ### Deploying the application
 
-To create the AWS infrastructure locally, you can use CDK and our `cdklocal` wrapper.
+To create the AWS infrastructure locally, you can use CDK and the `lstk cdk` proxy.
 
 ```shell
-cdklocal bootstrap
-cdklocal deploy
+lstk cdk bootstrap
+lstk cdk deploy
 ```
 This will deploy the `SqsBlogStack` stack. You will see the following output:
 
@@ -103,8 +102,8 @@ The `SqsBlogStack.S3BucketName` output is the name of the S3 bucket that we will
 You can copy the `sqs_blog/sample_file.csv` file to the S3 bucket to trigger the event-driven architecture. You can use the following AWS CLI command to copy the file to the S3 bucket:
 
 ```shell
-BUCKET_NAME=$(awslocal s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
-awslocal s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
+BUCKET_NAME=$(lstk aws s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
+lstk aws s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
 ```
 
 You can now navigate to the [LocalStack Web Application](https://app.localstack.cloud) and the [DynamoDB Resource Browser](https://app.localstack.cloud/inst/default/resources/dynamodb).
