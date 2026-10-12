@@ -42,6 +42,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Configure the AWS profile
+        run: lstk setup aws --force --non-interactive
+
       - name: Start LocalStack
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
@@ -58,9 +61,7 @@ jobs:
           lstk cdk deploy --require-approval never
 
       - name: Run tests
-        run: |
-          export BUCKET_NAME=$(lstk aws s3 ls | grep sqsblogstack-inventoryupdatesbucketfe | awk '{print $3}')
-          lstk aws s3 cp sqs_blog/sample_file.csv s3://$BUCKET_NAME
+        run: make test
 
       - name: Send a Slack notification
         if: failure() || github.event_name != 'pull_request'

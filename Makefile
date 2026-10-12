@@ -24,4 +24,7 @@ deploy:		## Deploy infrastructure using CDK
 	lstk cdk bootstrap
 	lstk cdk deploy --require-approval never
 
-.PHONY: usage install start stop logs deploy
+test:		## Upload the sample CSV and verify the items in DynamoDB
+	./test.sh
+
+.PHONY: usage install start stop logs deploy test
