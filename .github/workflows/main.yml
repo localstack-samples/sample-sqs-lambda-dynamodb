@@ -42,6 +42,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Configure the AWS profile
+        run: lstk setup aws --force --non-interactive
+
       - name: Start LocalStack
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
